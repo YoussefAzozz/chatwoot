@@ -1,0 +1,62 @@
+version: '3.7'
+
+services:
+  pgbackweb:
+    image: eduardolat/pgbackweb:latest
+    networks:
+      - nome_rede_interna
+    volumes:
+      - backups:/backups
+    environment:
+      PBW_ENCRYPTION_KEY: "bXlTdXBlclNlY3JldEtleTEyMzQ1Njc4OTA="
+      PBW_POSTGRES_CONN_STRING: "postgresql://postgres:password@postgres_pgbackweb:5432/pgbackweb?sslmode=disable"
+      TZ: "America/Sao_Paulo"
+
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker   # good practice
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.pgbackweb.rule=Host(`pgbackweb.grwx.me`)
+        - traefik.http.routers.pgbackweb.entrypoints=websecure
+        - traefik.http.routers.pgbackweb.tls.certresolver=letsencryptresolver
+        - traefik.http.services.pgbackweb.loadbalancer.server.port=8085
+        - traefik.docker.network=nome_rede_interna
+        - traefik.http.routers.pgbackweb.middlewares=sslheader
+        - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+        - traefik.http.middlewares.minio-console-ipwhitelist.ipwhitelist.sourcerange=154.176.40.253/32 # Replace with your allowed IPs
+        - traefik.http.routers.minio_console.middlewares=minio-console-ipwhitelist
+
+  postgres_pgbackweb:
+    image: postgres:17
+    networks:
+      - nome_rede_interna
+    volumes:
+      - postgres_pgbackweb:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: pgbackweb
+      POSTGRES_PASSWORD: password
+      TZ: "America/Sao_Paulo"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      labels:
+        - traefik.enable=false
+
+volumes:
+  backups:
+    external: true
+  postgres_pgbackweb:
+    external: true
+
+networks:
+  nome_rede_interna:
+    external: true

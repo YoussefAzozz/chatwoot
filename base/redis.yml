@@ -1,0 +1,38 @@
+version: "3.7"
+services:
+
+  redis:
+    image: redis:7.4.2  ## Versão do Redis
+    command: [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--port",
+        "6379"
+      ]
+
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - nome_rede_interna ## Nome da rede interna
+
+
+    deploy:
+      placement:
+        constraints:
+          - node.role == worker
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2048M
+
+volumes:
+  redis_data:
+    external: true
+    name: redis_data
+
+networks:
+  nome_rede_interna: ## Nome da rede interna
+    external: true
+    name: nome_rede_interna ## Nome da rede interna
