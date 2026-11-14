@@ -32,7 +32,7 @@ services:
         constraints: [node.role == manager]
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.portainer.rule=Host(`infra.grwx.me`)" ## Dominio do Portainer
+        - "traefik.http.routers.portainer.rule=Host(``)" ## Dominio do Portainer
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
         - "traefik.http.routers.portainer.tls.certresolver=letsencryptresolver"
         - "traefik.http.routers.portainer.service=portainer"
