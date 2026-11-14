@@ -23,7 +23,7 @@ services:
       - SECRET_KEY_BASE=ca68dcd674b1e9e460671be221c30f30
 
     ## 💬 Url Chatwoot
-      - FRONTEND_URL=https://happiness.grwx.me
+      - FRONTEND_URL=https://
       - FORCE_SSL=true
 
     ## 🌍 Idioma/Localização padrão
